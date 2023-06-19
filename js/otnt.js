@@ -2,10 +2,10 @@
 /* otnt.js: Generate the OTNT reference graph
 /*
 /*  Copyright (c) 2011, John D. Lewis
-/*  
+/*
 /*  See README for setup and usage information
 /*  See LICENSE for full license information
-/*  
+/*
 /*  Link data source: http://mb-soft.com/believe/txh/ntot.htm -- used with permission
 /**********************************************/
 
@@ -27,8 +27,8 @@ var fixr = {};
 fixr.x = view.center.x;
 fixr.y = view.center.y;
 var r = 300; // radius
-var start, end;
-var cRad = 2; // radius of link end point circle
+//var start, end;
+//var cRad = 2; // radius of link end point circle
 
 /* Define which links to show. Note: if showX is set to "false", they will not appear
  *   on the graphic at any time. In order to enable the view toggle, the variable showX
@@ -48,18 +48,17 @@ var drawChapterMarkers = true; // Draw tick marks for every 10 chapters
 var numBooks = books.length;
 
 var arcThickness = 20; // thickness of each book arc
-var buffer = .5; // buffer (in degrees) between each book
+var buffer = 0.5; // buffer (in degrees) between each book
 var innerLinkArcBuffer = 5; // buffer (in pixels) between the end of each link and the book arc
 var totalChapterCount = 1189; // TODO: Calculate?
 
 // Set up the link colors; used in getLinkColor(...)
-var linkColorGeneric = new RGBColor(0,0,1);
-var linkColorSyn = new RGBColor(1,0,1);
-var linkColorJohn = new RGBColor(0,1,1);
-var linkColorActs = new RGBColor(.5,.5,0);
-var linkColorHeb = new RGBColor(.5,.5,.5);
-var linkColorRev = new RGBColor(1,0,0);
-
+var linkColorGeneric = new Color('rgb', [0,0,1]);
+var linkColorSyn = new Color('rgb', [1,0,1]);
+var linkColorJohn = new Color('rgb', [0,1,1]);
+var linkColorActs = new Color('rgb', [0.5,0.5,0]);
+var linkColorHeb = new Color('rgb', [0.5,0.5,0.5]);
+var linkColorRev = new Color('rgb', [1,0,0]);
 var degPerChapter = (360 - (buffer * numBooks))/totalChapterCount;
 // console.log("degPerChapter = " + degPerChapter);
 
@@ -96,7 +95,7 @@ for (var linkCtr = 0; linkCtr < links.length; linkCtr++) {
 	bk1 = books[bk1Num];
 	// console.log("bk1 = " + bk1.bkName);
 	bk1Chp  = links[linkCtr].chpSource;
-	
+
 	bk2Num = booksByName[links[linkCtr].bkTarget];
 	bk2 = books[bk2Num];
 	// console.log("bk2 = " + bk2.bkName);
@@ -117,7 +116,7 @@ for (var linkCtr = 0; linkCtr < links.length; linkCtr++) {
 	var newAngleA = degA + toRad(degPerChapter * bk1Chp);
 	var newAngleB = degB + toRad(degPerChapter * bk2Chp);
 	// console.log("newAngleA = " + toDeg(newAngleA) + "; newAngleB = " + toDeg(newAngleB));
-	
+
 	// addLink(bk1.startA,bk2.startA, newAngleA, bk2.startDeg + toRad(degPerChapter * bk2Chp));
 	addLink(newAngleA, newAngleB, links[linkCtr].bkSource, links[linkCtr].type);
 	// console.log("bk1.start: " + bk1.startA + "; bk2.startA: " + bk2.startA + "; bk1.startDeg: " + toDeg(bk1.startDeg) + "; bk2.startDeg: " + toDeg(bk2.startDeg));
@@ -162,11 +161,13 @@ function addBands() {
 }
 
 function toRad(deg) {
-	return(deg * (2 * Math.PI/360));
+    var retVal = deg * (2 * Math.PI/360);
+    return(retVal);
 }
 
 function toDeg(rad) {
-	return(rad * (360/(2 * Math.PI)));
+    var retVal = rad * (360/(2 * Math.PI));
+    return(retVal);
 }
 
 // Return the appropriate color for the book; currently either green (OT) or blue (NT)
@@ -179,33 +180,35 @@ function getBookArcColor(book) {
 }
 
 function getLinkColor(bkTarget) {
+        var retVal;
 	switch (bkTarget) {
 		case "NTMt":
 		case "NTMr":
 		case "NTLu":
-			return(linkColorSyn);
+			retVal = linkColorSyn;
 			break;
 		case "NTJoh":
-			return(linkColorJohn);
+			retVal = linkColorJohn;
 			break;
 		case "NTAc":
-			return(linkColorActs);
+			retVal = linkColorActs;
 			break;
 		case "NTHeb":
-			return(linkColorHeb);
+			retVal = linkColorHeb;
 			break;
 		case "NTRe":
-			return(linkColorRev);
+			retVal = linkColorRev;
 			break;
 		default:
-			return(linkColorGeneric);
+			retVal = linkColorGeneric;
 	}
+    return(retVal);
 }
 
 function addLink(aDeg, bDeg, bookName, linkType) {
 	if ((linkType == "q" && showQuotations) || (linkType == "a" && showAllusions) || (linkType == "p" && showPossibleAllusions)) {
 		var startAngle = aDeg;
-		
+
 		var toAngle = bDeg;
 
 		var through1 = getLinkThroughPoint(r-innerLinkArcBuffer, startAngle, toAngle);
@@ -214,35 +217,35 @@ function addLink(aDeg, bDeg, bookName, linkType) {
 
 		var arc1 = new Path.Arc(getPointOnArc(r-innerLinkArcBuffer, startAngle), through1, getPointOnArc(r-innerLinkArcBuffer,bDeg));
 		arc1.strokeColor = getLinkColor(bookName);
-		
+
 		// Set up the stroke type and width
 		if (linkType == "q") {
 			arc1.strokeWidth = 1;
 			layerQ.addChild(arc1);
 		} else if (linkType == "a") {
 			arc1.dashArray = [5, 2];
-			arc1.strokeWidth = .5;
+			arc1.strokeWidth = 0.5;
 			layerA.addChild(arc1);
 		} else if (linkType == "p") {
 			arc1.dashArray = [10, 4];
-			arc1.strokeWidth = .25;
+			arc1.strokeWidth = 0.25;
 			layerP.addChild(arc1);
 		} else {
 			arc1.dashArray = [15, 5];
-			arc1.strokeWidth = .1;
+			arc1.strokeWidth = 0.1;
 		}
 	}
 }
 
 function getLinkThroughPoint(r, a1, a2) {
-	var pt = new Point();
+	//var pt = new Point();
 	var d1 = toDeg(a1);
 	var d2 = toDeg(a2);
 	// simpleDebugLog("getLinkThroughPoint(" + r + ", " + d1 + ", " + d2);
-	
+
 	var delta = calcMidAngle(d1, d2); // (d1)+((d2-d1)/2);
 	// simpleDebugLog("delta/midDeg = " + delta + " == midway between " + toDeg(a2) + " and " + toDeg(a1));
-	
+
 	var midDeg = toRad(delta);
 	// simpleDebugLog("midDeg (initial): " + toDeg(midDeg));
 
@@ -255,7 +258,7 @@ function getLinkThroughPoint(r, a1, a2) {
 		minAngleAdjustment = 360 - minAngleAdjustment;
 		// simpleDebugLog("minAngleAdjustment (adj): " + minAngleAdjustment);
 	}
-	
+
 	var midRadius;
 
 	/* Calculate how far from the center the midpoint should go.
@@ -299,7 +302,7 @@ function getLinkThroughPoint(r, a1, a2) {
 		// simpleDebugLog("midRadius set to r/50");
 	}
 	// simpleDebugLog("midRadius: " + midRadius + "; midDeg: " + midDeg);
-	
+
 	return(getPointOnArc(midRadius, midDeg));
 }
 
@@ -313,24 +316,24 @@ function calcMidAngle(angle1, angle2) { // Find the angle between angle1 and ang
 	var minAngle = Math.min(angle1, angle2);
 	var avg = (maxAngle + minAngle)/2;
 	// simpleDebugLog("maxAngle: " + maxAngle + "; avg: " + avg + "; minAngle: " + minAngle);
-	
+
 	// Clean up the avg value
 	if (avg > 360) {
-		avg = avg - 360; 
-		// simpleDebugLog("  avg (adj): " + avg);
-	};
+		avg = avg - 360;
+		// simpleDebugLog("  avg (adj)
+    }
 
 	var deltaA = maxAngle - avg;
 	var deltaB = minAngle + avg;
 	var midAngle = avg; // default midAngle value
 	// simpleDebugLog("deltaA: " + deltaA + "; deltaB: " + deltaB + "; midAngle: " + midAngle);
-	
+
 	// Adjust the midAngle value if both deltaA and deltaB are > 90
 	if ((deltaA > 90) & (deltaB > 90)) {
 		midAngle = avg + 180;
 		// simpleDebugLog("midAngle (adj): " + midAngle);
-	};
-	
+	}
+
 	return(midAngle);
 }
 
@@ -341,18 +344,18 @@ function getPointOnArc(r, angle1) {
 }
 
 function drawBookArc(r, a1, a2, color) {
-	var startA, endB;
-	var startB, endB;
-	var pLine, pColor;
+	var startA, endB, startB;
+	//var startB, endB;
+	var pColor;
 
 	var a1Deg = toDeg(a1);
-	var a2Deg = toDeg(a2);
-	
+	//var a2Deg = toDeg(a2);
+
 	pColor = color;
 
 	var a1b = (Math.min(a1,a2) + (Math.abs(a1-a2)/2));
 	var a1bDeg = toDeg(a1b);
-	
+
 	var begin = getPointOnArc(r, a1); // new Point(ax,ay);
 	var through = getPointOnArc(r, a1b); // new Point(bx,by);
 	var to = getPointOnArc(r, a2); // new Point(cx,cy);
@@ -370,16 +373,16 @@ function drawBookArc(r, a1, a2, color) {
 	pLine1 = new Path.Line(startA, startB);
 	// Set up Line2
 	pLine2 = new Path.Line(endA, endB);
-	
+
 	// Merge the arcs and lines together
 	pArc1.join(pLine1);
 	pArc2.join(pLine2);
 	pArc1.join(pArc2);
 	pArc1.strokeColor = "black";
 	pArc1.fillColor = color;
-	
+
 	layerBooks.addChild(pArc1);
-	
+
 	// Add the book label
 	var innerBuffer = 10;
 	var startingPos = getPointOnArc(r+arcThickness+innerBuffer,a1b);
@@ -400,7 +403,7 @@ function drawBookArc(r, a1, a2, color) {
 		text.paragraphStyle.justification = "right";
 	}
 	layerBooks.addChild(text);
-	
+
 	if (drawChapterMarkers) {
 		// Draw the first chapter marker
 		var startPoint = getPointOnArc(r+arcThickness, a1);
@@ -409,16 +412,16 @@ function drawBookArc(r, a1, a2, color) {
 		var chpLine = new Path.Line(startPoint, endPoint);
 		chpLine.strokeColor = "black";
 		layerBooks.addChild(chpLine);
-		
+
 		// Draw chapter markers every 10 chapters
 		if (books[bkNum].numChapters > 10) {
 			var nextChpRad = toRad(a1Deg + (10 * degPerChapter));
 			var chpNum = 10;
 			while (nextChpRad < a2) {
-				var startPoint = getPointOnArc(r+arcThickness, nextChpRad);
-				var endPoint = getPointOnArc(r+arcThickness+5, nextChpRad);
+				startPoint = getPointOnArc(r+arcThickness, nextChpRad);
+				endPoint = getPointOnArc(r+arcThickness+5, nextChpRad);
 				// console.log(books[bkNum].bkName + ": nextChpDeg = " + nextChpDeg + "; a2Deg = " + a2Deg + "; chpNum = " + chpNum + "; startPoint-endPoint = " + startPoint + "-" + endPoint);
-				var chpLine = new Path.Line(startPoint, endPoint);
+				chpLine = new Path.Line(startPoint, endPoint);
 				chpLine.strokeColor = "black";
 				layerBooks.addChild(chpLine);
 				nextChpRad = nextChpRad + toRad(10 * degPerChapter);
@@ -426,7 +429,7 @@ function drawBookArc(r, a1, a2, color) {
 			}
 		}
 	}
-	
+
 	// Update the object with coordinate data
 	books[bkNum].startA = startA;
 	books[bkNum].endA = endA;
@@ -512,7 +515,7 @@ function setupLinks() {
 	var links = [];
 	links.length = 0;
 	processAllLinks = true;
-	
+
 	if (processAllLinks) {
 		// Possible
 		links.push({ "linkID": "OTNT519", "bkSource": "NT2Th", "chpSource": 2, "bkTarget": "OTIsa", "chpTarget": 11, "type": "p" });
@@ -1466,7 +1469,7 @@ function setupLinks() {
 function setupShortLinkList() {
 	var links = [];
 	links.length = 0;
-	
+
 	links.push({ "linkID": "OTNT520", "bkSource": "NT1Ti", "chpSource": 2, "bkTarget": "OTGen", "chpTarget": 1, "type": "p" });
 	links.push({ "linkID": "OTNT1", "bkSource": "NTMt", "chpSource": 1, "bkTarget": "OTIsa", "chpTarget": 7, "type": "q" });
 
@@ -1485,7 +1488,7 @@ function setupShortLinkList() {
 	// links.push({ "linkID": "OTNT605", "bkSource": "NTHeb", "chpSource": 11, "bkTarget": "OTDan", "chpTarget": 6, "type": "p" });
 	// links.push({ "linkID": "OTNT606", "bkSource": "NTHeb", "chpSource": 11, "bkTarget": "OTDan", "chpTarget": 3, "type": "p" });
 	// links.push({ "linkID": "OTNT611", "bkSource": "NTHeb", "chpSource": 12, "bkTarget": "OTNum", "chpTarget": 27, "type": "p" });
-	
+
 	// links.push({ "linkID": "OTNT631", "bkSource": "NTJas", "chpSource": 1, "bkTarget": "OTPro", "chpTarget": 17, "type": "p" });
 	// links.push({ "linkID": "OTNT641", "bkSource": "NTJas", "chpSource": 5, "bkTarget": "OTPro", "chpTarget": 16, "type": "p" });
 	// links.push({ "linkID": "OTNT648", "bkSource": "NT1Pe", "chpSource": 2, "bkTarget": "OTPsa", "chpTarget": 34, "type": "p" });
@@ -1505,7 +1508,7 @@ function setupShortLinkList() {
 	// links.push({ "linkID": "OTNT700", "bkSource": "NTRe", "chpSource": 1, "bkTarget": "OTDan", "chpTarget": 7, "type": "p" });
 	// links.push({ "linkID": "OTNT701", "bkSource": "NTRe", "chpSource": 1, "bkTarget": "OTDan", "chpTarget": 10, "type": "p" });
 	// links.push({ "linkID": "OTNT702", "bkSource": "NTRe", "chpSource": 1, "bkTarget": "OTEze", "chpTarget": 1, "type": "p" });
-		
+
 	// Allusions (3 test links)
 	// links.push({ "linkID": "OTNT13", "bkSource": "NTMt", "chpSource": 5, "bkTarget": "OTPsa", "chpTarget": 37, "type": "a" });
 	// links.push({ "linkID": "OTNT14", "bkSource": "NTMt", "chpSource": 5, "bkTarget": "OTExo", "chpTarget": 20, "type": "a" });
@@ -1516,7 +1519,7 @@ function setupShortLinkList() {
 	// links.push({ "linkID": "OTNT2", "bkSource": "NTMt", "chpSource": 2, "bkTarget": "OTMic", "chpTarget": 5, "type": "q" });
 	// links.push({ "linkID": "OTNT3", "bkSource": "NTMt", "chpSource": 2, "bkTarget": "OTHos", "chpTarget": 11, "type": "q" });
 	// links.push({ "linkID": "OTNT4", "bkSource": "NTMt", "chpSource": 2, "bkTarget": "OTJer", "chpTarget": 31, "type": "q" });
-	
+
 	return(links);
 }
 
@@ -1530,11 +1533,11 @@ if (trackMousePointer) {
 
 var startX = 0; var startY = 0;
 var deltaX = 0; var deltaY = 0;
-var newX = 0; var newY = 0;
+//var newX = 0; var newY = 0;
 
 var dragging = false;
 
-function onMouseDrag(event) { 
+function onMouseDrag(event) {
     if(event.modifiers.shift) {
         // If the shift key is down, change the point of
         // the last segment to the position of the mouse:
@@ -1574,7 +1577,7 @@ function onMouseMove(event) {
 
 function onKeyDown(event) {
 	// console.log("keydown event: key = " + event.key);
-	
+    var newX, newY;
 	if (event.key == '+') {
 		view.zoom = view.zoom + 1;
 	} else if (event.key == '-') {
@@ -1595,21 +1598,21 @@ function onKeyDown(event) {
 		layerBands.visible = !layerBands.visible;
 		// console.log("toggling layerBands.visible: " + layerBands.visible);
 	} else if (event.key == 'c') {
-		var newX = fixr.x;
-		var newY = fixr.y;
+		newX = fixr.x;
+		newY = fixr.y;
 		view.center = new Point(newX, newY);
 		// console.log("recentering view: " + newX + " x " + newY + " == " + view.canvas.width/2 + " x " + view.canvas.height/2);
 	} else if (event.key == 'r') {
-		var newX = 0; //view.canvas.width/2;
-		var newY = 0; //view.canvas.height/2;
+		newX = 0; //view.canvas.width/2;
+		newY = 0; //view.canvas.height/2;
 		view.center = new Point(0, 0); //newX, newY);
 		view.zoom = 1;
 		// console.log("resetting view: " + view.center.x + " x " + view.center.y);
 	}
-	
+
 	return false;
 }
 
 function simpleDebugLog(strLog) {
-	if (debugOn) { console.log(strLog); };
+	if (debugOn) { console.log(strLog); }
 }
